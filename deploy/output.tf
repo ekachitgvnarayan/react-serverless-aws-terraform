@@ -4,7 +4,7 @@ output "app_url" {
 }
 
 output "api_base_url" {
-  value = aws_api_gateway_deployment.app.invoke_url
+  value = aws_api_gateway_stage.this.invoke_url
 }
 
 output "user_pool_id" {
