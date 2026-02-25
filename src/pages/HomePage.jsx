@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { PageHeader } from "antd";
 import { Card, Button, Input } from "antd";
 import "antd/dist/antd.css";
+import "../App.css";
 import { Layout, Spin } from "antd";
 import { API, Auth } from "aws-amplify";
 
@@ -75,81 +76,86 @@ const HomePage = () => {
   }
 
   return (
-    <div>
-      <Content style={{ padding: "0 50px" }}>
-        <div className="site-layout-content">
-          <PageHeader
-            className="site-page-header"
-            title={`Welcome ${currnetUsername}`}
-            subTitle="To-do list powered by AWS serverless architecture"
-            style={styles.header}
-          />
-        </div>
-        <div>
-          <Input
-            onChange={event => setInput("name", event.target.value)}
-            value={formState.name}
-            placeholder="Name"
-            style={styles.input}
-          />
-          <Input
-            onChange={event => setInput("description", event.target.value)}
-            value={formState.description}
-            placeholder="Description"
-            style={styles.input}
-          />
-          <Button onClick={addTodo} type="primary" style={styles.submit}>
-            Add
-          </Button>
-        </div>
-        {loadingComplete ? (
-          <div>
-            {todos.map((todo, index) => (
-              <Card
-                key={todo.todoId ? todo.todoId.S : index}
-                title={todo.name.S ? todo.name.S : todo.name}
-                style={{ width: 300 }}
-              >
-                <p>
-                  {todo.description.S ? todo.description.S : todo.description}
-                </p>
-                {todo.todoId && todo.username.S === currnetUsername && (
-                  <Button
-                    type="primary"
-                    onClick={() => removeTodo(todo.todoId.S)}
-                  >
-                    Done
-                  </Button>
-                )}
-                <Button>
-                  {todo.todoId && (
-                    <Link className="button" to={`/edit/${todo.todoId.S}`}>
-                      More
-                    </Link>
-                  )}
-                </Button>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Spin />
-        )}
-      </Content>
-    </div>
-  );
-};
+    <Content>
+      <div className="page-container">
+        <PageHeader
+          className="site-page-header"
+          title={`Welcome, ${currnetUsername}`}
+          subTitle="Manage your tasks with AWS serverless power"
+          style={{ marginBottom: 24 }}
+        />
 
-const styles = {
-  input: {
-    margin: "10px 0"
-  },
-  submit: {
-    margin: "10px 0",
-    marginBottom: "20px"
-  },
-  header: {
-    paddingLeft: "0px"
-  }
+        <div className="form-section">
+          <div className="form-row">
+            <Input
+              onChange={event => setInput("name", event.target.value)}
+              value={formState.name}
+              placeholder="Task name"
+              onPressEnter={addTodo}
+            />
+            <Input
+              onChange={event => setInput("description", event.target.value)}
+              value={formState.description}
+              placeholder="Description"
+              onPressEnter={addTodo}
+            />
+            <Button onClick={addTodo} type="primary">
+              Add Task
+            </Button>
+          </div>
+        </div>
+
+        {loadingComplete ? (
+          todos.length > 0 ? (
+            <div className="todo-grid">
+              {todos.map((todo, index) => (
+                <Card
+                  key={todo.todoId ? todo.todoId.S : index}
+                  title={todo.name.S ? todo.name.S : todo.name}
+                >
+                  <p className="card-description">
+                    {todo.description.S ? todo.description.S : todo.description}
+                  </p>
+                  {todo.username && (
+                    <p className="card-meta">
+                      by {todo.username.S ? todo.username.S : todo.username}
+                    </p>
+                  )}
+                  <div className="card-actions">
+                    {todo.todoId && todo.username.S === currnetUsername && (
+                      <Button
+                        className="btn-danger"
+                        onClick={() => removeTodo(todo.todoId.S)}
+                        size="small"
+                      >
+                        Done
+                      </Button>
+                    )}
+                    {todo.todoId && (
+                      <Button size="small">
+                        <Link to={`/edit/${todo.todoId.S}`}>Details</Link>
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-state-icon">📝</div>
+              <div className="empty-state-text">
+                No tasks yet. Add your first one above!
+              </div>
+            </div>
+          )
+        ) : (
+          <div style={{ textAlign: "center", padding: "60px 0" }}>
+            <Spin size="large" />
+          </div>
+        )}
+      </div>
+    </Content>
+  );
 };
 
 export default HomePage;

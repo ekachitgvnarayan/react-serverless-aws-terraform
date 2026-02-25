@@ -7,7 +7,9 @@ const { Header } = Layout;
 
 const Navbar = () => (
   <Header>
-    <div className="logo" />
+    <div className="nav-brand">
+      Error<span>Forensics</span>
+    </div>
     <Menu theme="dark" mode="horizontal" defaultSelectedKeys={["1"]}>
       <Menu.Item key="1">
         <Link to="/">Home</Link>
@@ -15,7 +17,7 @@ const Navbar = () => (
       <Menu.Item key="2">
         <Link to="/about">About</Link>
       </Menu.Item>
-      <Menu.Item key="3">
+      <Menu.Item key="3" style={{ marginLeft: "auto" }}>
         <AmplifySignOut />
       </Menu.Item>
     </Menu>

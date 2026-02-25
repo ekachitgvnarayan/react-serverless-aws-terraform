@@ -1,10 +1,8 @@
-default_region      = "us-east-1"
-github_username     = "MatthewCYLau"
+default_region      = "eu-west-2"
+github_username     = "ekachitgvnarayan"
 github_project_name = "react-serverless-aws-terraform"
-app_name            = "matlau-react-serverless-app"
-environment         = "staging"
-common_tags         = { project = "react-serverless-aws-terraform" }
-domain_name         = "awsserverless.com"
-bucket_name         = "awsserverless.com"
-
-
+app_name            = "hackathon-demo"
+environment         = "dev"
+common_tags         = { project = "aithon-teamforensics-2026" }
+domain_name         = "ai-athon-demo.local"
+bucket_name         = "ai-athon-demo-frontend-ekachit"

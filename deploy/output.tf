@@ -19,6 +19,3 @@ output "identity_pool_id" {
   value = aws_cognito_identity_pool.app_identity_pool.id
 }
 
-output "domain_hosted_zone_id" {
-  value = data.aws_route53_zone.this.zone_id
-}

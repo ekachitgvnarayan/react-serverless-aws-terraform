@@ -20,7 +20,7 @@ resource "aws_s3_bucket_cors_configuration" "www_bucket" {
   cors_rule {
     allowed_headers = ["Authorization", "Content-Length"]
     allowed_methods = ["GET", "POST"]
-    allowed_origins = ["https://www.${var.domain_name}"]
+    allowed_origins = ["*"]
     max_age_seconds = 3000
   }
 }
@@ -30,60 +30,22 @@ resource "aws_s3_bucket_ownership_controls" "www_bucket" {
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
-  depends_on = [aws_s3_bucket_public_access_block.www_bucket]
 }
 
 resource "aws_s3_bucket_public_access_block" "www_bucket" {
   bucket = aws_s3_bucket.www_bucket.id
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-}
-
-resource "aws_s3_bucket_acl" "www_bucket" {
-  depends_on = [
-    aws_s3_bucket_ownership_controls.www_bucket,
-  ]
-  bucket = aws_s3_bucket.www_bucket.id
-  acl    = "public-read"
-}
-
-resource "aws_s3_bucket_policy" "www_bucket" {
-  bucket     = aws_s3_bucket.www_bucket.id
-  policy     = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "PublicReadGetObject",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": [
-        "s3:GetObject"
-      ],
-      "Resource": [
-        "${aws_s3_bucket.www_bucket.arn}/*"
-      ]
-    }
-  ]
-}
-POLICY
-  depends_on = [aws_s3_bucket_public_access_block.www_bucket]
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 # S3 bucket for redirecting non-www to www.
 resource "aws_s3_bucket" "root_bucket" {
-  bucket = var.bucket_name
-  tags   = var.common_tags
-}
-
-resource "aws_s3_bucket_website_configuration" "root_bucket" {
-  bucket = aws_s3_bucket.root_bucket.id
-  redirect_all_requests_to {
-    host_name = "https://www.${var.domain_name}"
-  }
+  bucket        = var.bucket_name
+  force_destroy = true
+  tags          = var.common_tags
 }
 
 resource "aws_s3_bucket_ownership_controls" "root_bucket" {
@@ -91,45 +53,12 @@ resource "aws_s3_bucket_ownership_controls" "root_bucket" {
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
-  depends_on = [aws_s3_bucket_public_access_block.root_bucket]
 }
 
 resource "aws_s3_bucket_public_access_block" "root_bucket" {
   bucket                  = aws_s3_bucket.root_bucket.id
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
-
-resource "aws_s3_bucket_acl" "root_bucket" {
-  depends_on = [
-    aws_s3_bucket_ownership_controls.root_bucket,
-  ]
-  bucket = aws_s3_bucket.root_bucket.id
-  acl    = "public-read"
-}
-
-resource "aws_s3_bucket_policy" "root_bucket" {
-  bucket     = aws_s3_bucket.root_bucket.id
-  policy     = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "PublicReadGetObject",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": [
-        "s3:GetObject"
-      ],
-      "Resource": [
-        "${aws_s3_bucket.root_bucket.arn}/*"
-      ]
-    }
-  ]
-}
-POLICY
-  depends_on = [aws_s3_bucket_public_access_block.root_bucket]
-}
-

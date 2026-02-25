@@ -1,10 +1,10 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "eu-west-2"
 }
 
 provider "aws" {
   alias  = "acm_provider"
-  region = "us-east-1"
+  region = "eu-west-2"
 }
 
 terraform {
@@ -16,9 +16,9 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "react-serverless-app-tf-state"
+    bucket = "hackathon-tfstate-errorforensic-2026"
     key    = "terraform.tfstate"
-    region = "us-east-1"
+    region = "eu-west-2"
   }
 }
 

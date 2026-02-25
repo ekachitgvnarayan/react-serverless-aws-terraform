@@ -2,7 +2,7 @@
 const AWS = require("aws-sdk");
 
 // Set the region
-AWS.config.update({ region: "us-east-1" });
+AWS.config.update({ region: "eu-west-2" });
 
 // Create DynamoDB service object
 const ddb = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
@@ -14,7 +14,7 @@ exports.handler = function(event, context, callback) {
     TableName: "comments",
     Item: {
       commentId: { S: event.requestContext.requestId },
-      identityId: { S: event.requestContext.identity.cognitoIdentityId },
+      identityId: { S: (event.requestContext.identity && event.requestContext.identity.cognitoIdentityId) || "anonymous" },
       username: { S: JSON.parse(event.body).username },
       content: { S: JSON.parse(event.body).content },
       todoId: { S: JSON.parse(event.body).todoId }

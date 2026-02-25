@@ -3,7 +3,9 @@ import { Layout } from "antd";
 const { Footer } = Layout;
 
 const AppFooter = () => (
-  <Footer style={{ textAlign: "center" }}>Matthew Lau ©{new Date().toLocaleDateString()}</Footer>
+  <Footer style={{ textAlign: "center" }}>
+    Error Forensics Team &copy; {new Date().getFullYear()}
+  </Footer>
 );
 
 export default AppFooter;

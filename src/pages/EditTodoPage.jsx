@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Card, Button, Spin, Input, PageHeader } from "antd";
+import { Layout, Button, Spin, Input, PageHeader } from "antd";
 import { Link } from "react-router-dom";
 import { API, Auth } from "aws-amplify";
 import CommentsList from "../components/CommentsList";
@@ -7,18 +7,11 @@ import CommentsList from "../components/CommentsList";
 const { Content } = Layout;
 
 const EditTodoPage = ({ location, history }) => {
-  // form state
   const initialFormState = { name: "", description: "" };
   const [formState, setFormState] = useState(initialFormState);
-
-  // todo state
   const initialTodoState = { name: "", description: "" };
   const [todo, setTodo] = useState(initialTodoState);
-
-  // loading state
   const [loadingComplete, setLoadingComplete] = useState(false);
-
-  // current username state
   const [currnetUsername, setCurrnetUsername] = useState("");
 
   const todoId = location.pathname.split("/")[2];
@@ -26,10 +19,8 @@ const EditTodoPage = ({ location, history }) => {
   async function fetchTodo() {
     try {
       const res = await API.get("todos", `/todos/${todoId}`);
-      const todo = res.Item;
-      const name = todo.name.S;
-      const description = todo.description.S;
-      setTodo({ name, description });
+      const item = res.Item;
+      setTodo({ name: item.name.S, description: item.description.S });
       setLoadingComplete({ loadingComplete: true });
     } catch (err) {
       console.log("error fetching todo");
@@ -51,9 +42,7 @@ const EditTodoPage = ({ location, history }) => {
       if (!formState.name || !formState.description) return;
       const config = {
         body: formState,
-        headers: {
-          "Content-Type": "application/json"
-        }
+        headers: { "Content-Type": "application/json" }
       };
       await API.put("todos", `/todos/${todoId}`, config);
       history.push("/");
@@ -66,80 +55,70 @@ const EditTodoPage = ({ location, history }) => {
     setFormState({ ...formState, [key]: value });
   }
 
-  // When component mounts, fetchTodo by todoId
   useEffect(() => {
     fetchCurrnetUsername();
     fetchTodo();
   }, []);
 
-  // When todo updates, set form state
   useEffect(() => {
     if (todo.name) {
-      const name = todo.name;
-      const description = todo.description;
-      setFormState({ name, description });
+      setFormState({ name: todo.name, description: todo.description });
     }
   }, [todo]);
 
   return (
-    <div>
-      <Content style={{ padding: "0 50px" }}>
-        <div className="site-layout-content">
-          <PageHeader
-            className="site-page-header"
-            title="Edit To-Do"
-            style={styles.header}
-          />
-        </div>
+    <Content>
+      <div className="page-container">
+        <PageHeader
+          className="site-page-header"
+          title="Edit Task"
+          style={{ marginBottom: 24 }}
+        />
+
         {loadingComplete ? (
           <div>
-            <div>
-              <Input
-                onChange={event => setInput("name", event.target.value)}
-                value={formState.name}
-                placeholder="Name"
-                style={styles.input}
-              />
-              <Input
-                onChange={event => setInput("description", event.target.value)}
-                value={formState.description}
-                placeholder="Description"
-                style={styles.input}
-              />
-              <Button onClick={editTodo} type="primary" style={styles.submit}>
-                Save
-              </Button>
+            <div className="edit-current">
+              <h3>{todo.name}</h3>
+              <p>{todo.description}</p>
             </div>
 
-            <Card title={todo.name} style={{ wtodoIdth: 300 }}>
-              <p>{todo.description}</p>
-              <Button>
-                <Link className="button" to="/">
-                  Back
-                </Link>
-              </Button>
-            </Card>
+            <div className="form-section">
+              <div style={{ marginBottom: 12 }}>
+                <Input
+                  onChange={event => setInput("name", event.target.value)}
+                  value={formState.name}
+                  placeholder="Task name"
+                />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <Input
+                  onChange={event =>
+                    setInput("description", event.target.value)
+                  }
+                  value={formState.description}
+                  placeholder="Description"
+                />
+              </div>
+              <div className="card-actions">
+                <Button onClick={editTodo} type="primary">
+                  Save Changes
+                </Button>
+                <Button>
+                  <Link to="/">Back to Home</Link>
+                </Button>
+              </div>
+            </div>
+
             <CommentsList todoId={todoId} username={currnetUsername} />
           </div>
         ) : (
-          <Spin />
+          <div style={{ textAlign: "center", padding: "60px 0" }}>
+            <Spin size="large" />
+          </div>
         )}
-      </Content>
-    </div>
+      </div>
+    </Content>
   );
-};
-
-const styles = {
-  input: {
-    margin: "10px 0"
-  },
-  submit: {
-    margin: "10px 0",
-    marginBottom: "20px"
-  },
-  header: {
-    paddingLeft: "0px"
-  }
 };
 
 export default EditTodoPage;

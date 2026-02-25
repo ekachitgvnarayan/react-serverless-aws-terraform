@@ -39,36 +39,3 @@ resource "aws_codebuild_project" "app" {
     type = "CODEPIPELINE"
   }
 }
-
-resource "aws_codebuild_project" "invalidate_cache" {
-  name          = "invalidate-cloudfront-cache"
-  description   = "Invalidate Cloudfront cache"
-  build_timeout = "5"
-  service_role  = aws_iam_role.codebuild_invalidate_cloudfront_role.arn
-
-  artifacts {
-    type = "CODEPIPELINE"
-  }
-
-  environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:4.0"
-    type                        = "LINUX_CONTAINER"
-    image_pull_credentials_type = "CODEBUILD"
-
-    environment_variable {
-      name  = "ROOT_S3_DISTRIBUTION_ID"
-      value = aws_cloudfront_distribution.root_s3_distribution.id
-    }
-
-    environment_variable {
-      name  = "WWW_S3_DISTRIBUTION_ID"
-      value = aws_cloudfront_distribution.www_s3_distribution.id
-    }
-  }
-
-  source {
-    type      = "CODEPIPELINE"
-    buildspec = "deploy/codebuild-buildspecs/invalidate-cloudfront-buildspec.yml"
-  }
-}
