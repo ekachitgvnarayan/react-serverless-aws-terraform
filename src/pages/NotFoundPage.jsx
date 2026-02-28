@@ -14,7 +14,7 @@ const NotFoundPage = () => {
           <p>The page you're looking for doesn't exist or has been moved.</p>
           <div style={{ marginTop: 24 }}>
             <Button type="primary">
-              <Link to="/">Go Home</Link>
+              <Link to="/">Back to Dashboard</Link>
             </Button>
           </div>
         </div>

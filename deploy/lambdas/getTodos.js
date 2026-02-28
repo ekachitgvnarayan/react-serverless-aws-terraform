@@ -1,29 +1,46 @@
-// Load the AWS SDK for Node.js
 const AWS = require("aws-sdk");
-
-// Set the region
 AWS.config.update({ region: "eu-west-2" });
-
-// Create DynamoDB service object
 const ddb = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
-exports.handler = function(event, context, callback) {
-  const params = {
-    TableName: "todos"
+const SERVICE_NAME = "GetClaims";
+
+function structuredLog(level, message, event, extra = {}) {
+  const headers = (event && event.headers) || {};
+  const log = {
+    timestamp: new Date().toISOString(),
+    level: level,
+    service: SERVICE_NAME,
+    correlation_id: headers["X-Correlation-ID"] || headers["x-correlation-id"] || "none",
+    browser_os: headers["X-Browser-Info"] || headers["x-browser-info"] || "unknown",
+    device_model: headers["X-Device-Model"] || headers["x-device-model"] || "unknown",
+    user_action: headers["X-User-Action"] || headers["x-user-action"] || "unknown",
+    request_id: (event && event.requestContext && event.requestContext.requestId) || "unknown",
+    message: message,
+    ...extra
   };
+  console.log(JSON.stringify(log));
+}
 
-  let responseCode = 200;
-  let responseBody = "";
+exports.handler = function (event, context, callback) {
+  structuredLog("INFO", "Request received", event);
 
-  ddb.scan(params, function(err, data) {
+  const params = { TableName: "todos" };
+
+  ddb.scan(params, function (err, data) {
+    let responseCode = 200;
+    let responseBody = "";
+
     if (err) {
-      console.log("Error", err);
+      structuredLog("ERROR", "DynamoDB scan failed", event, {
+        error: { name: err.code || "UnknownError", message: err.message }
+      });
       responseCode = 500;
       responseBody = err;
     } else {
-      console.log("Success", data);
+      structuredLog("INFO", "Claims retrieved successfully", event, { count: data.Count });
       responseBody = data;
     }
+
     const response = {
       statusCode: responseCode,
       headers: {
@@ -32,7 +49,6 @@ exports.handler = function(event, context, callback) {
       },
       body: JSON.stringify(responseBody)
     };
-  
     callback(null, response);
   });
 };

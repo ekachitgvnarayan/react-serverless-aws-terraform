@@ -4,7 +4,7 @@ const { Footer } = Layout;
 
 const AppFooter = () => (
   <Footer style={{ textAlign: "center" }}>
-    Error Forensics Team &copy; {new Date().getFullYear()}
+    InsureFlow &mdash; AI-powered Claims Management &copy; {new Date().getFullYear()}
   </Footer>
 );
 

@@ -31,82 +31,136 @@ resource "aws_lambda_function" "get_todo_by_id" {
   role             = aws_iam_role.lambda_exec.arn
 }
 
+data "archive_file" "update_todo_by_id_zip" {
+  type        = "zip"
+  source_file = "lambdas/updateTodoById.js"
+  output_path = "lambdas/updateTodoById.zip"
+}
+
 resource "aws_lambda_function" "update_todo_by_id" {
   function_name    = "UpdateTodoById"
-  filename         = "lambdas/updateTodoById.zip"
-  source_code_hash = filebase64sha256("lambdas/updateTodoById.zip")
+  filename         = data.archive_file.update_todo_by_id_zip.output_path
+  source_code_hash = data.archive_file.update_todo_by_id_zip.output_base64sha256
   handler          = "updateTodoById.handler"
   runtime          = "nodejs16.x"
   role             = aws_iam_role.lambda_exec.arn
 }
 
+data "archive_file" "delete_todo_by_id_zip" {
+  type        = "zip"
+  source_file = "lambdas/deleteTodoById.js"
+  output_path = "lambdas/deleteTodoById.zip"
+}
+
 resource "aws_lambda_function" "delete_todo_by_id" {
   function_name    = "DeleteTodoById"
-  filename         = "lambdas/deleteTodoById.zip"
-  source_code_hash = filebase64sha256("lambdas/deleteTodoById.zip")
+  filename         = data.archive_file.delete_todo_by_id_zip.output_path
+  source_code_hash = data.archive_file.delete_todo_by_id_zip.output_base64sha256
   handler          = "deleteTodoById.handler"
   runtime          = "nodejs16.x"
   role             = aws_iam_role.lambda_exec.arn
 }
 
+data "archive_file" "create_todo_zip" {
+  type        = "zip"
+  source_file = "lambdas/createTodo.js"
+  output_path = "lambdas/createTodo.zip"
+}
+
 resource "aws_lambda_function" "create_todo" {
   function_name    = "CreateTodo"
-  filename         = "lambdas/createTodo.zip"
-  source_code_hash = filebase64sha256("lambdas/createTodo.zip")
+  filename         = data.archive_file.create_todo_zip.output_path
+  source_code_hash = data.archive_file.create_todo_zip.output_base64sha256
   handler          = "createTodo.handler"
   runtime          = "nodejs16.x"
   role             = aws_iam_role.lambda_exec.arn
 }
 
+data "archive_file" "create_comment_zip" {
+  type        = "zip"
+  source_file = "lambdas/createComment.js"
+  output_path = "lambdas/createComment.zip"
+}
+
 resource "aws_lambda_function" "create_comment" {
   function_name    = "CreateComment"
-  filename         = "lambdas/createComment.zip"
-  source_code_hash = filebase64sha256("lambdas/createComment.zip")
+  filename         = data.archive_file.create_comment_zip.output_path
+  source_code_hash = data.archive_file.create_comment_zip.output_base64sha256
   handler          = "createComment.handler"
   runtime          = "nodejs16.x"
   role             = aws_iam_role.lambda_exec.arn
 }
 
+data "archive_file" "get_comments_zip" {
+  type        = "zip"
+  source_file = "lambdas/getComments.js"
+  output_path = "lambdas/getComments.zip"
+}
+
 resource "aws_lambda_function" "get_comments" {
   function_name    = "GetComments"
-  filename         = "lambdas/getComments.zip"
-  source_code_hash = filebase64sha256("lambdas/getComments.zip")
+  filename         = data.archive_file.get_comments_zip.output_path
+  source_code_hash = data.archive_file.get_comments_zip.output_base64sha256
   handler          = "getComments.handler"
   runtime          = "nodejs16.x"
   role             = aws_iam_role.lambda_exec.arn
 }
 
+data "archive_file" "delete_comment_by_id_zip" {
+  type        = "zip"
+  source_file = "lambdas/deleteCommentById.js"
+  output_path = "lambdas/deleteCommentById.zip"
+}
+
 resource "aws_lambda_function" "delete_comment_by_id" {
   function_name    = "DeleteCommentById"
-  filename         = "lambdas/deleteCommentById.zip"
-  source_code_hash = filebase64sha256("lambdas/deleteCommentById.zip")
+  filename         = data.archive_file.delete_comment_by_id_zip.output_path
+  source_code_hash = data.archive_file.delete_comment_by_id_zip.output_base64sha256
   handler          = "deleteCommentById.handler"
   runtime          = "nodejs16.x"
   role             = aws_iam_role.lambda_exec.arn
 }
 
+data "archive_file" "create_like_zip" {
+  type        = "zip"
+  source_file = "lambdas/createLike.js"
+  output_path = "lambdas/createLike.zip"
+}
+
 resource "aws_lambda_function" "create_like" {
   function_name    = "CreateLike"
-  filename         = "lambdas/createLike.zip"
-  source_code_hash = filebase64sha256("lambdas/createLike.zip")
+  filename         = data.archive_file.create_like_zip.output_path
+  source_code_hash = data.archive_file.create_like_zip.output_base64sha256
   handler          = "createLike.handler"
   runtime          = "nodejs16.x"
   role             = aws_iam_role.lambda_exec.arn
 }
 
+data "archive_file" "get_likes_zip" {
+  type        = "zip"
+  source_file = "lambdas/getLikes.js"
+  output_path = "lambdas/getLikes.zip"
+}
+
 resource "aws_lambda_function" "get_likes" {
   function_name    = "GetLikes"
-  filename         = "lambdas/getLikes.zip"
-  source_code_hash = filebase64sha256("lambdas/getLikes.zip")
+  filename         = data.archive_file.get_likes_zip.output_path
+  source_code_hash = data.archive_file.get_likes_zip.output_base64sha256
   handler          = "getLikes.handler"
   runtime          = "nodejs16.x"
   role             = aws_iam_role.lambda_exec.arn
 }
 
+data "archive_file" "delete_like_by_id_zip" {
+  type        = "zip"
+  source_file = "lambdas/deleteLikeById.js"
+  output_path = "lambdas/deleteLikeById.zip"
+}
+
 resource "aws_lambda_function" "delete_like_by_id" {
   function_name    = "DeleteLikeById"
-  filename         = "lambdas/deleteLikeById.zip"
-  source_code_hash = filebase64sha256("lambdas/deleteLikeById.zip")
+  filename         = data.archive_file.delete_like_by_id_zip.output_path
+  source_code_hash = data.archive_file.delete_like_by_id_zip.output_base64sha256
   handler          = "deleteLikeById.handler"
   runtime          = "nodejs16.x"
   role             = aws_iam_role.lambda_exec.arn

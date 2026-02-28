@@ -5,9 +5,23 @@ import "./App.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 
-// Amplify
+import * as Sentry from "@sentry/react";
 import { Amplify } from "aws-amplify";
 import config from "../src/conf/config";
+
+if (config.sentry.DSN) {
+  Sentry.init({
+    dsn: config.sentry.DSN,
+    integrations: [Sentry.browserTracingIntegration()],
+    tracesSampleRate: 1.0,
+    environment: process.env.NODE_ENV || "development",
+    beforeSend(event) {
+      event.tags = event.tags || {};
+      event.tags.app = "insureflow";
+      return event;
+    }
+  });
+}
 
 Amplify.configure({
   Auth: {
@@ -35,7 +49,4 @@ ReactDOM.render(
   document.getElementById("root")
 );
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();

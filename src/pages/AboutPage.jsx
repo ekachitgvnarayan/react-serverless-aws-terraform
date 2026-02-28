@@ -11,7 +11,9 @@ const techStack = [
   { name: "Cognito", desc: "Authentication" },
   { name: "S3", desc: "Static hosting" },
   { name: "SQS", desc: "Message queue" },
-  { name: "Terraform", desc: "Infrastructure as code" }
+  { name: "Sentry", desc: "Error monitoring" },
+  { name: "Terraform", desc: "Infrastructure as code" },
+  { name: "CloudWatch", desc: "System logging" }
 ];
 
 const AboutPage = () => {
@@ -19,11 +21,13 @@ const AboutPage = () => {
     <Content>
       <div className="page-container">
         <div className="about-hero">
-          <h1>AI-athon 2026</h1>
+          <h1>InsureFlow</h1>
           <p>
-            A serverless to-do application built on AWS, deployed with Terraform.
-            This project serves as the error-generating workload for our
-            AI-driven Incident Triage Assistant — Error Forensics.
+            A serverless insurance claims management platform built on AWS,
+            deployed with Terraform. InsureFlow powers the error-generating
+            workload for our AI-driven Incident Triage Assistant &mdash;
+            correlating CloudWatch system logs with Sentry application traces
+            to deliver intelligent root cause analysis.
           </p>
         </div>
 

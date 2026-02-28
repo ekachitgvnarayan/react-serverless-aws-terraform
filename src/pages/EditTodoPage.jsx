@@ -1,53 +1,63 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Button, Spin, Input, PageHeader } from "antd";
+import { Layout, Button, Spin, Input, PageHeader, Select } from "antd";
 import { Link } from "react-router-dom";
-import { API, Auth } from "aws-amplify";
+import { Auth } from "aws-amplify";
 import CommentsList from "../components/CommentsList";
+import { apiGet, apiPut } from "../utils/api";
 
 const { Content } = Layout;
+const { Option } = Select;
+
+const CLAIM_TYPES = [
+  "Auto Collision",
+  "Property Damage",
+  "Health - Surgery",
+  "Health - Emergency",
+  "Life Insurance",
+  "Travel Insurance",
+  "Liability Claim",
+  "Workers Compensation",
+  "Home Insurance",
+  "Other"
+];
 
 const EditTodoPage = ({ location, history }) => {
   const initialFormState = { name: "", description: "" };
   const [formState, setFormState] = useState(initialFormState);
-  const initialTodoState = { name: "", description: "" };
-  const [todo, setTodo] = useState(initialTodoState);
+  const initialClaimState = { name: "", description: "" };
+  const [claim, setClaim] = useState(initialClaimState);
   const [loadingComplete, setLoadingComplete] = useState(false);
-  const [currnetUsername, setCurrnetUsername] = useState("");
+  const [currentUsername, setCurrentUsername] = useState("");
 
-  const todoId = location.pathname.split("/")[2];
+  const claimId = location.pathname.split("/")[2];
 
-  async function fetchTodo() {
+  async function fetchClaim() {
     try {
-      const res = await API.get("todos", `/todos/${todoId}`);
+      const res = await apiGet(`/todos/${claimId}`, "view_claim_details");
       const item = res.Item;
-      setTodo({ name: item.name.S, description: item.description.S });
-      setLoadingComplete({ loadingComplete: true });
+      setClaim({ name: item.name.S, description: item.description.S });
+      setLoadingComplete(true);
     } catch (err) {
-      console.log("error fetching todo");
+      console.log("error fetching claim:", err);
     }
   }
 
-  async function fetchCurrnetUsername() {
+  async function fetchCurrentUsername() {
     try {
       const res = await Auth.currentUserInfo();
-      setCurrnetUsername(res.username);
+      setCurrentUsername(res.username);
     } catch (err) {
-      console.log(err);
-      console.log("error fetching current username");
+      console.log("error fetching current username:", err);
     }
   }
 
-  async function editTodo() {
+  async function updateClaim() {
     try {
       if (!formState.name || !formState.description) return;
-      const config = {
-        body: formState,
-        headers: { "Content-Type": "application/json" }
-      };
-      await API.put("todos", `/todos/${todoId}`, config);
+      await apiPut(`/todos/${claimId}`, formState, "update_claim");
       history.push("/");
     } catch (err) {
-      console.log("error updating todo:", err);
+      console.log("error updating claim:", err);
     }
   }
 
@@ -56,39 +66,51 @@ const EditTodoPage = ({ location, history }) => {
   }
 
   useEffect(() => {
-    fetchCurrnetUsername();
-    fetchTodo();
+    fetchCurrentUsername();
+    fetchClaim();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (todo.name) {
-      setFormState({ name: todo.name, description: todo.description });
+    if (claim.name) {
+      setFormState({ name: claim.name, description: claim.description });
     }
-  }, [todo]);
+  }, [claim]);
 
   return (
     <Content>
       <div className="page-container">
         <PageHeader
           className="site-page-header"
-          title="Edit Task"
+          title="Claim Details"
           style={{ marginBottom: 24 }}
         />
 
         {loadingComplete ? (
           <div>
             <div className="edit-current">
-              <h3>{todo.name}</h3>
-              <p>{todo.description}</p>
+              <span className="claim-status" style={{ float: "right" }}>Open</span>
+              <h3>{claim.name}</h3>
+              <p>{claim.description}</p>
             </div>
 
             <div className="form-section">
+              <div className="section-title" style={{ borderBottom: "none", marginBottom: 8, paddingBottom: 0, fontSize: 16 }}>
+                Update Claim
+              </div>
               <div style={{ marginBottom: 12 }}>
-                <Input
-                  onChange={event => setInput("name", event.target.value)}
-                  value={formState.name}
-                  placeholder="Task name"
-                />
+                <Select
+                  value={formState.name || undefined}
+                  placeholder="Claim Type"
+                  onChange={value => setInput("name", value)}
+                  style={{ width: "100%" }}
+                  size="large"
+                  dropdownStyle={{ background: "#21242f", borderColor: "#2e3140" }}
+                >
+                  {CLAIM_TYPES.map(type => (
+                    <Option key={type} value={type}>{type}</Option>
+                  ))}
+                </Select>
               </div>
               <div style={{ marginBottom: 12 }}>
                 <Input
@@ -96,20 +118,20 @@ const EditTodoPage = ({ location, history }) => {
                     setInput("description", event.target.value)
                   }
                   value={formState.description}
-                  placeholder="Description"
+                  placeholder="Updated claim details"
                 />
               </div>
               <div className="card-actions">
-                <Button onClick={editTodo} type="primary">
-                  Save Changes
+                <Button onClick={updateClaim} type="primary">
+                  Update Claim
                 </Button>
                 <Button>
-                  <Link to="/">Back to Home</Link>
+                  <Link to="/">Back to Dashboard</Link>
                 </Button>
               </div>
             </div>
 
-            <CommentsList todoId={todoId} username={currnetUsername} />
+            <CommentsList todoId={claimId} username={currentUsername} />
           </div>
         ) : (
           <div style={{ textAlign: "center", padding: "60px 0" }}>

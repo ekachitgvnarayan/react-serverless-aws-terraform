@@ -8,11 +8,11 @@ const { Header } = Layout;
 const Navbar = () => (
   <Header>
     <div className="nav-brand">
-      Error<span>Forensics</span>
+      Insure<span>Flow</span>
     </div>
     <Menu theme="dark" mode="horizontal" defaultSelectedKeys={["1"]}>
       <Menu.Item key="1">
-        <Link to="/">Home</Link>
+        <Link to="/">Dashboard</Link>
       </Menu.Item>
       <Menu.Item key="2">
         <Link to="/about">About</Link>

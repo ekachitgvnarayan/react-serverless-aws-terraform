@@ -1,67 +1,62 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "antd";
-import { API } from "aws-amplify";
-import { LikeOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined } from "@ant-design/icons";
+import { apiGet, apiPost, apiDelete } from "../utils/api";
 
 const Likes = ({ commentId, username }) => {
-  const [likes, setLikes] = useState([]);
+  const [approvals, setApprovals] = useState([]);
 
-  const handleOnClickLike = commentId => {
-    const userHasLikedComment =
-      likes.filter(like => like.username.S === username).length > 0;
-    if (!userHasLikedComment) {
-      addLike(commentId);
+  const handleToggleApproval = commentId => {
+    const userHasApproved =
+      approvals.filter(a => a.username.S === username).length > 0;
+    if (!userHasApproved) {
+      addApproval(commentId);
     } else {
-      removeLike();
+      removeApproval();
     }
   };
 
-  const addLike = async commentId => {
+  const addApproval = async commentId => {
     try {
-      const config = {
-        body: { username, commentId },
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      await API.post("todos", "/likes", config);
-      fetchLikesCountByComment(commentId);
+      await apiPost("/likes", { username, commentId }, "approve_note");
+      fetchApprovals(commentId);
     } catch (err) {
-      console.log("error creating like:", err);
+      console.log("error creating approval:", err);
     }
   };
 
-  async function removeLike() {
-    const likeId = likes.filter(like => like.username.S === username)[0].likeId
-      .S;
+  async function removeApproval() {
+    const approvalId = approvals.filter(a => a.username.S === username)[0]
+      .likeId.S;
     try {
-      setLikes(likes.filter(like => like.likeId.S !== likeId));
-      await API.del("todos", `/likes/${likeId}`);
-      fetchLikesCountByComment(commentId);
+      setApprovals(approvals.filter(a => a.likeId.S !== approvalId));
+      await apiDelete(`/likes/${approvalId}`, "revoke_approval");
+      fetchApprovals(commentId);
     } catch (err) {
-      console.log("error removing like:", err);
+      console.log("error removing approval:", err);
     }
   }
 
-  const fetchLikesCountByComment = async commentId => {
+  const fetchApprovals = async commentId => {
     try {
-      const res = await API.get("todos", `/likes?commentId=${commentId}`);
-      setLikes(res.Items);
+      const res = await apiGet(`/likes?commentId=${commentId}`, "load_approvals");
+      setApprovals(res.Items);
     } catch (err) {
-      console.log("error fetching likes");
+      console.log("error fetching approvals:", err);
     }
   };
 
   useEffect(() => {
-    fetchLikesCountByComment(commentId);
+    fetchApprovals(commentId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Button
-      icon={<LikeOutlined />}
-      onClick={() => handleOnClickLike(commentId)}
+      icon={<CheckCircleOutlined />}
+      onClick={() => handleToggleApproval(commentId)}
     >
-      {likes.length > 0 ? likes.length : <div style={styles.placeholder}></div>}
+      {approvals.length > 0 ? approvals.length : <div style={styles.placeholder}></div>}
     </Button>
   );
 };

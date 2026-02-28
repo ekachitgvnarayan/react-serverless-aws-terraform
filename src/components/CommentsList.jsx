@@ -1,97 +1,94 @@
 import React, { useEffect, useState } from "react";
 import { Spin, Card, Input, Button } from "antd";
-import { API } from "aws-amplify";
 import Likes from "./Likes";
+import { apiGet, apiPost, apiDelete } from "../utils/api";
 
 const CommentsList = ({ todoId, username }) => {
   const initialFormState = { content: "" };
   const [formState, setFormState] = useState(initialFormState);
-  const [comments, setComments] = useState([]);
-  const [loadingComplete, setloadingComplete] = useState(true);
+  const [notes, setNotes] = useState([]);
+  const [loadingComplete, setLoadingComplete] = useState(true);
 
   useEffect(() => {
-    fetchComments();
+    fetchNotes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function setInput(key, value) {
     setFormState({ ...formState, [key]: value });
   }
 
-  async function fetchComments() {
+  async function fetchNotes() {
     try {
-      const res = await API.get("todos", `/comments?todoId=${todoId}`);
-      setComments(res.Items);
-      setloadingComplete({ loadingComplete: true });
+      const res = await apiGet(`/comments?todoId=${todoId}`, "load_claim_notes");
+      setNotes(res.Items);
+      setLoadingComplete(true);
     } catch (err) {
-      console.log("error fetching comments");
+      console.log("error fetching notes:", err);
     }
   }
 
-  async function addComment() {
+  async function addNote() {
     try {
       if (!formState.content) return;
-      const comment = { ...formState, todoId, username };
+      const note = { ...formState, todoId, username };
       setFormState(initialFormState);
-      const config = {
-        body: comment,
-        headers: { "Content-Type": "application/json" }
-      };
-      await API.post("todos", "/comments", config);
-      fetchComments();
+      await apiPost("/comments", note, "add_claim_note");
+      fetchNotes();
     } catch (err) {
-      console.log("error creating comment:", err);
+      console.log("error creating note:", err);
     }
   }
 
-  async function removeComment(id) {
+  async function removeNote(id) {
     try {
-      setComments(comments.filter(comment => comment.commentId.S !== id));
-      await API.del("todos", `/comments/${id}`);
+      setNotes(notes.filter(note => note.commentId.S !== id));
+      await apiDelete(`/comments/${id}`, "delete_claim_note");
     } catch (err) {
-      console.log("error removing comment:", err);
+      console.log("error removing note:", err);
     }
   }
 
   return (
     <div>
-      <div className="section-title">Comments</div>
+      <div className="section-title">Claim Notes</div>
 
       <div className="form-section">
         <div className="form-row">
           <Input
             onChange={event => setInput("content", event.target.value)}
             value={formState.content}
-            placeholder="Write a comment..."
-            onPressEnter={addComment}
+            placeholder="Add a note to this claim..."
+            onPressEnter={addNote}
           />
-          <Button onClick={addComment} type="primary">
-            Add
+          <Button onClick={addNote} type="primary">
+            Add Note
           </Button>
         </div>
       </div>
 
       {loadingComplete ? (
-        comments.length > 0 ? (
+        notes.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {comments.map((comment, index) => (
+            {notes.map((note, index) => (
               <Card
-                key={comment.commentId ? comment.commentId.S : index}
+                key={note.commentId ? note.commentId.S : index}
                 size="small"
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
                     <p style={{ margin: 0, color: "#e8e8ed", fontWeight: 500 }}>
-                      {comment.content.S}
+                      {note.content.S}
                     </p>
-                    <p className="card-meta">{comment.username.S}</p>
+                    <p className="card-meta">Agent: {note.username.S}</p>
                   </div>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <Likes commentId={comment.commentId.S} username={username} />
-                    {comment.username.S === username && (
+                    <Likes commentId={note.commentId.S} username={username} />
+                    {note.username.S === username && (
                       <Button
                         className="btn-danger"
                         size="small"
-                        onClick={() => removeComment(comment.commentId.S)}
+                        onClick={() => removeNote(note.commentId.S)}
                       >
                         Delete
                       </Button>
@@ -103,7 +100,7 @@ const CommentsList = ({ todoId, username }) => {
           </div>
         ) : (
           <div className="empty-state" style={{ padding: "32px 0" }}>
-            <div className="empty-state-text">No comments yet.</div>
+            <div className="empty-state-text">No notes on this claim yet.</div>
           </div>
         )
       ) : (
